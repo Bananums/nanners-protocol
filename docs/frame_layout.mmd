@@ -1,0 +1,6 @@
+flowchart LR
+    A[SOF\n1 byte] --> B[ID\n2 bytes\nuint16_t]
+    B --> C[LEN\n1 byte\nvalue = 16]
+    C --> D[PAYLOAD\n16 bytes]
+    D --> E[CRC\n2 bytes\nCRC-16]
+    E --> F[EOF\n1 byte]

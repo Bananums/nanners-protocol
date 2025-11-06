@@ -1,0 +1,13 @@
+flowchart TD
+    A[Start] --> B[Prepare ID - uint16_t]
+    B --> C[Prepare PAYLOAD - 16 bytes]
+    C --> D[Set LEN = 16]
+    D --> E[Compute CRC16 over ID + LEN + PAYLOAD]
+    E --> F{Output}
+    F --> G[Write SOF - 0xAA]
+    G --> H[Write ID - high, low]
+H --> I[Write LEN - 0x10]
+I --> J[Write PAYLOAD - 16 bytes]
+J --> K[Write CRC - high, low]
+K --> L[Write EOF - 0x55]
+L --> M[Done]

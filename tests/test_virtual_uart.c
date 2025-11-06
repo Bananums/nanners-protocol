@@ -17,39 +17,42 @@ int main(void) {
     uint8_t wire[64];
     size_t n = 0;
 
+    NannersFrame frame;
+    NannersInit(&frame);
+
     wire[n++] = (uint8_t)NANNERS_START_OF_FRAME;
     wire[n++] = (uint8_t)(frame_id >> 8);
     wire[n++] = (uint8_t)(frame_id & 0xFF);
     wire[n++] = (uint8_t)sizeof(payload);
     memcpy(&wire[n], payload, sizeof(payload)); n += sizeof(payload);
 
-    wire[n++] = 0u;
-    wire[n++] = 0u;
+    // 13226
+    wire[n++] = 0x33;
+    wire[n++] = 0xaa;
 
     wire[n++] = (uint8_t)NANNERS_END_OF_FRAME;
 
     // Feed byte-by-byte
     for (size_t i = 0; i < n; ++i) {
-        NannersProcessBytes(wire[i]);
+        NannersProcessBytes(&frame, wire[i]);
     }
 
     // Check result
-    NannersFrame out = {0};
-    assert(NannersGetFrame(&out) == true);
+    assert(frame.valid == true);
 
     // Print result
-    printf("Expected frame_id: %u, got: %u\n", frame_id, out.frame_id);
+    printf("Expected frame_id: %u, got: %u\n", frame_id, frame.frame_id);
     printf("Expected length: %zu, got: %u\n",
-           sizeof(payload), out.length);
+           sizeof(payload), frame.length);
     printf("Payload bytes:\n");
-    for (size_t i = 0; i < out.length; ++i)
+    for (size_t i = 0; i < frame.length; ++i)
         printf("  [%02zu] expected: %02X  got: %02X\n",
-               i, payload[i], out.payload[i]);
+               i, payload[i], frame.payload[i]);
     printf("\n");
 
-    assert(out.frame_id == frame_id);
-    assert(out.length == sizeof(payload));
-    assert(memcmp(out.payload, payload, sizeof(payload)) == 0);
+    assert(frame.frame_id == frame_id);
+    assert(frame.length == sizeof(payload));
+    assert(memcmp(frame.payload, payload, sizeof(payload)) == 0);
 
     return 0;
 }

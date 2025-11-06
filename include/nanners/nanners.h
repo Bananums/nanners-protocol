@@ -13,8 +13,9 @@
 extern "C" {
 #endif
 
-void NannersProcessBytes(uint8_t byte);
-bool NannersGetFrame(NannersFrame *frame_out);
+void NannersInit(NannersFrame* frame);
+void NannersReset(NannersFrame* frame);
+void NannersProcessBytes(NannersFrame* frame, uint8_t byte);
 
 #ifdef __cplusplus
 }  /* extern "C" */
