@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 enum {
-    NANNERS_MAX_PAYLOAD_SIZE = 16,
+    NANNERS_MAX_PAYLOAD_SIZE = 8,
 };
 
 enum {
@@ -19,10 +19,11 @@ enum {
 typedef enum {
     NANNERS_WAIT_FOR_SOF  = 0,
     NANNERS_READ_FRAME_ID = 1,
-    NANNERS_READ_LENGTH   = 2,
-    NANNERS_READ_PAYLOAD  = 3,
-    NANNERS_READ_CRC      = 4,
-    NANNERS_VERIFY_EOF    = 5
+    NANNERS_READ_SEQUENCE = 2,
+    NANNERS_READ_LENGTH   = 3,
+    NANNERS_READ_PAYLOAD  = 4,
+    NANNERS_READ_CRC      = 5,
+    NANNERS_VERIFY_EOF    = 6
 } NannersState;
 
 #ifdef __cplusplus

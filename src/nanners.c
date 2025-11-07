@@ -48,15 +48,23 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
             if (frame->index == 0) {
                 frame->frame_id = (uint16_t)byte << 8; // high byte first
                 frame->index = 1;
-                printf("Received frame id part: %02X\n", byte);
+                printf("Received frame id part HI: %02X\n", byte);
             } else {  // index == 1
                 frame->frame_id |= (uint16_t)byte; // low byte last
-                printf("Received frame id part: %02X\n", byte);
+                printf("Received frame id part LO: %02X\n", byte);
                 printf("Received frame id 0x%04X - %u\n", frame->frame_id, frame->frame_id);
-                frame->state = NANNERS_READ_LENGTH;
+                frame->state = NANNERS_READ_SEQUENCE;
                 frame->index = 0;
             }
         break;
+
+        case NANNERS_READ_SEQUENCE: {
+            frame->seq = byte;
+            printf("Received frame seq 0x%04X - %u\n", frame->seq, frame->seq);
+            frame->state = NANNERS_READ_LENGTH;
+            frame->index = 0;
+            break;
+        }
 
         case NANNERS_READ_LENGTH:
             frame->length = byte;
@@ -71,7 +79,6 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
 
         case NANNERS_READ_PAYLOAD:
             frame->payload[frame->index++] = byte;
-            //printf("Received frame payload %02X\n", byte);
         if (frame->index >= frame->length) {
             frame->state = NANNERS_READ_CRC;
             frame->index = 0;
@@ -82,10 +89,10 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
             if (frame->index == 0) {
                 frame->crc = (uint16_t)byte << 8; // high byte first
                 frame->index = 1;
-                printf("Received frame id part: %02X\n", byte);
+                printf("Received crd part HI: %02X\n", byte);
             } else {  // index == 1
                 frame->crc |= (uint16_t)byte; // low byte last
-                printf("Received frame id part: %02X\n", byte);
+                printf("Received crc part LO: %02X\n", byte);
                 printf("Received CRC 0x%04X - %u\n", frame->crc, frame->crc);
                 frame->state = NANNERS_VERIFY_EOF;
                 frame->index = 0; //TODO Check if necessray to reset here

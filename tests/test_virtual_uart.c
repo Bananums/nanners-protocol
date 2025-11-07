@@ -23,6 +23,7 @@ int main(void) {
     wire[n++] = (uint8_t)NANNERS_START_OF_FRAME;
     wire[n++] = (uint8_t)(frame_id >> 8);
     wire[n++] = (uint8_t)(frame_id & 0xFF);
+    wire[n++] = (uint8_t)(123);
     wire[n++] = (uint8_t)sizeof(payload);
     memcpy(&wire[n], payload, sizeof(payload)); n += sizeof(payload);
 

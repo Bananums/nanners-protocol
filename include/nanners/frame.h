@@ -13,6 +13,7 @@ extern "C" {
 typedef struct __attribute__((packed)) {
     NannersState state;
     uint16_t frame_id;
+    uint8_t seq;
     uint8_t length;
     uint8_t payload[NANNERS_MAX_PAYLOAD_SIZE];
     uint16_t crc;
