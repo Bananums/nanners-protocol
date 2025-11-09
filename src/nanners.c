@@ -5,18 +5,70 @@
 #include "nanners/nanners.h"
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include <stdbool.h>
 
-static uint16_t NannersCalculateCrc16(const uint8_t *data, uint8_t len) { //TODO(add into state machine)
-    /* TODO: polynomial/seed per spec */
-    uint16_t crc = 0xFFFFu;
+typedef struct {
+    uint16_t data[256];
+} Crc16Table;
+
+static Crc16Table MakeTable() {
+    const uint16_t polynomial = 0x1021u; //MSB-first
+   Crc16Table table = {0};
+   for (uint32_t i = 0; i < 256; ++i) {
+       uint16_t crc = (uint16_t)(i << 8);
+
+       for (int b = 0; b < 8; ++b) {
+           const bool msb = (crc & 0x8000u) != 0u;
+           crc = (uint16_t)(crc << 1);
+           if (msb) {
+               crc ^= polynomial;
+           }
+       }
+       table.data[i] = crc;
+   }
+    return table;
+}
+
+static const Crc16Table* GetCrc16Table() {
+    static Crc16Table table;
+    static int initialized = 0;
+    if (initialized == 0) {
+        table = MakeTable();
+        initialized = 1;
+    }
+    return &table;
+}
+
+static uint16_t ComputeCrc16(const uint8_t *data, uint8_t len) { //TODO(add into state machine)
+    const Crc16Table* table = GetCrc16Table(); // Get from static storage to only compute once in program
+    uint16_t crc = 0xFFFFu; // Final XOR = 0 init value
     for (uint8_t i = 0; i < len; ++i) {
-        crc ^= (uint16_t)data[i];
-        for (int b = 0; b < 8; ++b) {
-            crc = (crc & 1u) ? (crc >> 1) ^ 0xA001u : (crc >> 1);
-        }
+        const uint8_t index = crc >> 8 ^ data[i] & 0xFFu;
+        crc = (uint16_t)(crc << 8 ^ table->data[index]);
     }
     return crc;
+}
+
+/* ---- Frame CRC over: frame_id, seq, length, payload[0..length-1] -------- */
+/* MSB-first (network byte order) for frame_id */
+uint16_t ComputeFrameCrc(const NannersFrame* frame) {
+    assert(frame != NULL);
+    assert(frame->length <= NANNERS_MAX_PAYLOAD_SIZE);
+
+    enum { kConst = sizeof(frame->frame_id) + sizeof(frame->seq) + sizeof(frame->length) };
+    uint8_t buffer[kConst + sizeof(frame->payload)];
+
+    buffer[0] = (uint8_t)(frame->frame_id >> 8);
+    buffer[1] = (uint8_t)(frame->frame_id & 0xFFu);
+    buffer[2] = frame->seq;
+    buffer[3] = frame->length;
+    for (uint8_t i = 0; i < frame->length; ++i) {
+        buffer[kConst + i] = frame->payload[i];
+    }
+    const uint8_t total = (uint8_t)kConst + (uint8_t)frame->length;
+    return ComputeCrc16(buffer, total);
+
 }
 
 void NannersInit(NannersFrame* frame){
