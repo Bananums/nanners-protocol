@@ -16,6 +16,7 @@ extern "C" {
 void NannersInit(NannersFrame* frame);
 void NannersReset(NannersFrame* frame);
 void NannersProcessBytes(NannersFrame* frame, uint8_t byte);
+uint16_t ComputeFrameCrc (const NannersFrame* frame);
 
 #ifdef __cplusplus
 }  /* extern "C" */

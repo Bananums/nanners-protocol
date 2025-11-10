@@ -13,9 +13,21 @@ int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0); // Display prints, even if an assert fails
     // Build a frame in-memory and feed bytes to your parser (virtual UART).
     const uint16_t frame_id = 0x0123; // 291
+    const uint8_t seq = 12;
     const uint8_t payload[] = {0x10, 0x20, 0x30};
+
     uint8_t wire[64];
     size_t n = 0;
+
+    NannersFrame in;
+    NannersInit(&in);
+    in.frame_id = frame_id;
+    in.seq = seq;
+    in.length = sizeof(payload);
+    in.payload[0] = payload[0];
+    in.payload[1] = payload[1];
+    in.payload[2] = payload[2];
+    const uint16_t crc = ComputeFrameCrc(&in);
 
     NannersFrame frame;
     NannersInit(&frame);
@@ -23,14 +35,11 @@ int main(void) {
     wire[n++] = (uint8_t)NANNERS_START_OF_FRAME;
     wire[n++] = (uint8_t)(frame_id >> 8);
     wire[n++] = (uint8_t)(frame_id & 0xFF);
-    wire[n++] = (uint8_t)(123);
+    wire[n++] = (uint8_t)(seq);
     wire[n++] = (uint8_t)sizeof(payload);
     memcpy(&wire[n], payload, sizeof(payload)); n += sizeof(payload);
-
-    // 13226
-    wire[n++] = 0x33;
-    wire[n++] = 0xaa;
-
+    wire[n++] = (uint8_t)(crc >> 8);
+    wire[n++] = (uint8_t)(crc & 0xFF);
     wire[n++] = (uint8_t)NANNERS_END_OF_FRAME;
 
     // Feed byte-by-byte

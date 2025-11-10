@@ -40,14 +40,21 @@ static const Crc16Table* GetCrc16Table() {
     return &table;
 }
 
-static uint16_t ComputeCrc16(const uint8_t *data, uint8_t len) { //TODO(add into state machine)
+static uint16_t ComputeCrc16(uint16_t crc, const uint8_t *data, uint8_t len) { //TODO(add into state machine)
     const Crc16Table* table = GetCrc16Table(); // Get from static storage to only compute once in program
-    uint16_t crc = 0xFFFFu; // Final XOR = 0 init value
     for (uint8_t i = 0; i < len; ++i) {
-        const uint8_t index = crc >> 8 ^ data[i] & 0xFFu;
+        const uint8_t index = crc >> 8 & 0xFFu ^ data[i];
         crc = (uint16_t)(crc << 8 ^ table->data[index]);
     }
     return crc;
+}
+
+static bool NannersCheckCrc(const NannersFrame* frame) {
+    assert(frame != NULL);
+    assert(frame->length <= NANNERS_MAX_PAYLOAD_SIZE);
+
+    const uint16_t wanted_crc = ComputeFrameCrc(frame);
+    return (wanted_crc == frame->crc);
 }
 
 /* ---- Frame CRC over: frame_id, seq, length, payload[0..length-1] -------- */
@@ -56,19 +63,21 @@ uint16_t ComputeFrameCrc(const NannersFrame* frame) {
     assert(frame != NULL);
     assert(frame->length <= NANNERS_MAX_PAYLOAD_SIZE);
 
-    enum { kConst = sizeof(frame->frame_id) + sizeof(frame->seq) + sizeof(frame->length) };
-    uint8_t buffer[kConst + sizeof(frame->payload)];
+    //enum { kConst = sizeof(frame->frame_id) + sizeof(frame->seq) + sizeof(frame->length)};
+    enum { kHeaderSize = 4 };  // frame_id(2) + seq(1) + length(1)
 
+    uint8_t buffer[kHeaderSize];
     buffer[0] = (uint8_t)(frame->frame_id >> 8);
     buffer[1] = (uint8_t)(frame->frame_id & 0xFFu);
     buffer[2] = frame->seq;
     buffer[3] = frame->length;
-    for (uint8_t i = 0; i < frame->length; ++i) {
-        buffer[kConst + i] = frame->payload[i];
-    }
-    const uint8_t total = (uint8_t)kConst + (uint8_t)frame->length;
-    return ComputeCrc16(buffer, total);
 
+    /* CRC-16/CCITT-FALSE: poly=0x1021, init=0xFFFF, xorout=0x0000, refin=false, refout=false */
+    //Partially compute the crc over the header
+    const uint16_t partial_computed_crc = ComputeCrc16(0xFFFFu, buffer, sizeof(buffer));
+
+    // Complete CRC calculate on remaining payload. Done in two stages to reduce buffer size.
+    return ComputeCrc16(partial_computed_crc, frame->payload, frame->length);
 }
 
 void NannersInit(NannersFrame* frame){
@@ -154,10 +163,12 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
         case NANNERS_VERIFY_EOF:
             if (byte == (uint8_t)NANNERS_END_OF_FRAME) { // End of Frame
                 printf("Received end of frame byte %02X\n", byte);
-                //if (validate_crc(frame->payload, frame->length, frame->crc)) { //TODO add check
-                    //printf("Valid frame\n");
+                if (NannersCheckCrc(frame)) {
+                    printf("CRC okay\n");
                     frame->valid = true;
-                //}
+                } else {
+                    printf("CRC failed\n");
+                }
             }
         frame->state = NANNERS_WAIT_FOR_SOF;
         break;
