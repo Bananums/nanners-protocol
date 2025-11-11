@@ -33,13 +33,40 @@ order.
 Static library (default)
 
 ```shell
-cmake -B build -S .
-cmake --build build
+mkdir build
+cd build
+cmake ..
+make
 ```
 
 Shared library
 
 ```shell
-cmake -B build -S . -DBUILD_SHARED_LIBS=ON
+mkdir build
+cd build
+cmake .. -DBUILD_SHARED_LIBS=ON
 cmake --build build
+```
+
+## Install ##
+
+```shell
+sudo make install
+```
+
+## Linking with CMake ##
+
+To link the installed library, simply find and link the target 
+
+```shell
+find_package(nanners REQUIRED)
+add_executable(exampleapp main.cpp)
+target_link_libraries(exampleapp PRIVATE BANANUMS::nanners)
+```
+
+## Inclusion ##
+
+Include the library header
+```c++
+#include <nanners/nanners.h>
 ```

@@ -1,18 +1,66 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(nanners-protocol LANGUAGES C)
+project(nanners-protocol VERSION 0.1.0 LANGUAGES C)
+
+# Options
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(BUILD_TESTING "Enable tests" OFF)
+
+include(GNUInstallDirs)
 
 set(NANNERS_NAME nanners)
 
 add_library(${NANNERS_NAME} src/nanners.c)
+add_library(BANANUMS::${NANNERS_NAME} ALIAS ${NANNERS_NAME})  # build-tree alias
 
+target_compile_features(nanners PUBLIC c_std_11)
 target_include_directories(${NANNERS_NAME} PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Enable CTest & test subtree
-SET(BUILD_TESTING ON)
 if(BUILD_TESTING)
     include(CTest)            # defines BUILD_TESTING option
     add_subdirectory(tests)
 endif()
+
+# Install headers and library
+install(TARGETS nanners
+        EXPORT nannersTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# Package exports (BANANUMS::nanners for consumers)
+install(EXPORT nannersTargets
+        NAMESPACE BANANUMS::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nanners
+        FILE nannersTargets.cmake
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/nannersConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMinorVersion
+)
+configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/nannersConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/nannersConfig.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nanners
+)
+
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/nannersConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/nannersConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nanners
+)
+
+# Export for build-tree usage (optional quality-of-life)
+export(EXPORT nannersTargets
+        NAMESPACE BANANUMS::
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/nannersTargets.cmake")
