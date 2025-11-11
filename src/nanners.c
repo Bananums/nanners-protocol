@@ -16,7 +16,7 @@ static Crc16Table MakeTable() {
     const uint16_t polynomial = 0x1021u; //MSB-first
    Crc16Table table = {0};
    for (uint32_t i = 0; i < 256; ++i) {
-       uint16_t crc = (uint16_t)(i << 8);
+       uint16_t crc = i << 8;
 
        for (int b = 0; b < 8; ++b) {
            const bool msb = (crc & 0x8000u) != 0u;
