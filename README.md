@@ -45,8 +45,17 @@ Shared library
 mkdir build
 cd build
 cmake .. -DBUILD_SHARED_LIBS=ON
-cmake --build build
+make
 ```
+
+### Build options ###
+This project uses CMake. The following options can be enabled at configure time:
+
+| Option            | Default | Description                                        |
+|-------------------|---------|----------------------------------------------------|
+| `BUILD_TESTS`     | `OFF`   | Build unit tests                                   |
+| `BUILD_EXAMPLES`  | `OFF`   | Build example applications                         |
+| `NANNERS_DEBUG`   | `OFF`   | Enable debug logging in the protocol state machine |
 
 ## Install ##
 

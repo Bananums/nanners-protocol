@@ -11,10 +11,12 @@
 
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0); // Display prints, even if an assert fails
+    printf("Starting NANNERS TEST: virtual uart");
     // Build a frame in-memory and feed bytes to your parser (virtual UART).
     const uint16_t frame_id = 0x0123; // 291
-    const uint8_t seq = 12;
-    const uint8_t payload[] = {0x10, 0x20, 0x30};
+    const uint8_t seq = 0x67;
+    const uint8_t len = 0x03;
+    const uint8_t payload[8] = {0x10, 0x20, 0x30, 0x00, 0xF0, 0xAB, 0x00, 0x00};
 
     uint8_t wire[64];
     size_t n = 0;
@@ -23,7 +25,7 @@ int main(void) {
     NannersInit(&in);
     in.frame_id = frame_id;
     in.seq = seq;
-    in.length = sizeof(payload);
+    in.length = len;
     in.payload[0] = payload[0];
     in.payload[1] = payload[1];
     in.payload[2] = payload[2];
@@ -36,15 +38,16 @@ int main(void) {
     wire[n++] = (uint8_t)(frame_id >> 8);
     wire[n++] = (uint8_t)(frame_id & 0xFF);
     wire[n++] = (uint8_t)(seq);
-    wire[n++] = (uint8_t)sizeof(payload);
-    memcpy(&wire[n], payload, sizeof(payload)); n += sizeof(payload);
+    wire[n++] = (uint8_t)(len);
+    memcpy(&wire[n], payload, len);
+    n += len;
     wire[n++] = (uint8_t)(crc >> 8);
     wire[n++] = (uint8_t)(crc & 0xFF);
     wire[n++] = (uint8_t)NANNERS_END_OF_FRAME;
 
     // Feed byte-by-byte
     for (size_t i = 0; i < n; ++i) {
-        NannersProcessBytes(&frame, wire[i]);
+        NannersProcessByte(&frame, wire[i]);
     }
 
     // Check result
@@ -52,31 +55,19 @@ int main(void) {
 
     // Print result
     printf("Expected frame_id: %u, got: %u\n", frame_id, frame.frame_id);
-    printf("Expected length: %zu, got: %u\n",
-           sizeof(payload), frame.length);
+    printf("Expected sequence: %hhu, got: %u\n", seq, frame.seq);
+    printf("Expected length: %hhu, got: %u\n", len, frame.length);
     printf("Payload bytes:\n");
-    for (size_t i = 0; i < frame.length; ++i)
-        printf("  [%02zu] expected: %02X  got: %02X\n",
-               i, payload[i], frame.payload[i]);
+    for (size_t i = 0; i < frame.length; ++i) {
+        printf("  [%02zu] expected: %02X  got: %02X\n", i, payload[i], frame.payload[i]);
+    }
+    printf("Expected CRC: %d, got: %u\n", crc, frame.crc);
     printf("\n");
 
     assert(frame.frame_id == frame_id);
-    assert(frame.length == sizeof(payload));
-    assert(memcmp(frame.payload, payload, sizeof(payload)) == 0);
-
+    assert(frame.seq == seq);
+    assert(frame.length == len);
+    assert(memcmp(frame.payload, payload, len) == 0);
+    assert(frame.crc == crc);
     return 0;
 }
-
-//#if NANNERS_ENABLE_CRC
-  //uint8_t crc_src[3 + sizeof(payload)];
-  //crc_src[0] = (uint8_t)(frame_id >> 8);
-  //crc_src[1] = (uint8_t)(frame_id & 0xFF);
-  //crc_src[2] = (uint8_t)sizeof(payload);
-  //memcpy(&crc_src[3], payload, sizeof(payload));
-  //const uint16_t crc = nanners_crc16(crc_src, sizeof(crc_src));
-  //wire[n++] = (uint8_t)(crc >> 8);
-  //wire[n++] = (uint8_t)(crc & 0xFF);
-//#else
-  //wire[n++] = 0u;
-  //wire[n++] = 0u;
-//#endif

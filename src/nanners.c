@@ -3,10 +3,9 @@
 //
 
 #include "nanners/nanners.h"
+#include "nanners/nanners_log.h"
 #include <string.h>
-#include <stdio.h>
 #include <assert.h>
-#include <stdbool.h>
 
 typedef struct {
     uint16_t data[256];
@@ -89,17 +88,19 @@ void NannersReset(NannersFrame* frame) {
     frame->frame_id = 0;
     frame->length = 0;
     frame->crc = 0;
+    frame->index = 0;
     frame->valid = false;
     //frame->payload left as is, will be overwritten by new bytes
 }
 
 // Process each byte from UART
-void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
+void NannersProcessByte(NannersFrame* frame, uint8_t byte) {
 
     switch (frame->state) {
         case NANNERS_WAIT_FOR_SOF:
             if (byte == (uint8_t)NANNERS_START_OF_FRAME) { // Start of Frame
-              printf("Received start of frame byte: %02X\n", byte);
+              NANNERS_LOG("Received start of frame byte: %02X\n", byte);
+              frame->valid = false;
               frame->state = NANNERS_READ_FRAME_ID;
               frame->index = 0;
             }
@@ -109,11 +110,11 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
             if (frame->index == 0) {
                 frame->frame_id = (uint16_t)byte << 8; // high byte first
                 frame->index = 1;
-                printf("Received frame id part HI: %02X\n", byte);
+                NANNERS_LOG("Received frame id part HI: %02X\n", byte);
             } else {  // index == 1
                 frame->frame_id |= (uint16_t)byte; // low byte last
-                printf("Received frame id part LO: %02X\n", byte);
-                printf("Received frame id 0x%04X - %u\n", frame->frame_id, frame->frame_id);
+                NANNERS_LOG("Received frame id part LO: %02X\n", byte);
+                NANNERS_LOG("Received frame id 0x%04X - %u\n", frame->frame_id, frame->frame_id);
                 frame->state = NANNERS_READ_SEQUENCE;
                 frame->index = 0;
             }
@@ -121,7 +122,7 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
 
         case NANNERS_READ_SEQUENCE: {
             frame->seq = byte;
-            printf("Received frame seq 0x%04X - %u\n", frame->seq, frame->seq);
+            NANNERS_LOG("Received frame seq 0x%04X - %u\n", frame->seq, frame->seq);
             frame->state = NANNERS_READ_LENGTH;
             frame->index = 0;
             break;
@@ -129,7 +130,7 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
 
         case NANNERS_READ_LENGTH:
             frame->length = byte;
-            printf("Received frame length %d\n", frame->length);
+            NANNERS_LOG("Received frame length %d\n", frame->length);
         if (frame->length > NANNERS_MAX_PAYLOAD_SIZE) {
             frame->state = NANNERS_WAIT_FOR_SOF; // Invalid length, reset
         } else {
@@ -150,11 +151,11 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
             if (frame->index == 0) {
                 frame->crc = (uint16_t)byte << 8; // high byte first
                 frame->index = 1;
-                printf("Received crd part HI: %02X\n", byte);
+                NANNERS_LOG("Received crd part HI: %02X\n", byte);
             } else {  // index == 1
                 frame->crc |= (uint16_t)byte; // low byte last
-                printf("Received crc part LO: %02X\n", byte);
-                printf("Received CRC 0x%04X - %u\n", frame->crc, frame->crc);
+                NANNERS_LOG("Received crc part LO: %02X\n", byte);
+                NANNERS_LOG("Received CRC 0x%04X - %u\n", frame->crc, frame->crc);
                 frame->state = NANNERS_VERIFY_EOF;
                 frame->index = 0; //TODO Check if necessray to reset here
             }
@@ -162,12 +163,12 @@ void NannersProcessBytes(NannersFrame* frame, uint8_t byte) {
 
         case NANNERS_VERIFY_EOF:
             if (byte == (uint8_t)NANNERS_END_OF_FRAME) { // End of Frame
-                printf("Received end of frame byte %02X\n", byte);
+                NANNERS_LOG("Received end of frame byte %02X\n", byte);
                 if (NannersCheckCrc(frame)) {
-                    printf("CRC okay\n");
+                    NANNERS_LOG("CRC okay\n");
                     frame->valid = true;
                 } else {
-                    printf("CRC failed\n");
+                    NANNERS_LOG("CRC failed\n");
                 }
             }
         frame->state = NANNERS_WAIT_FOR_SOF;

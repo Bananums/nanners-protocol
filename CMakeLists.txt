@@ -10,6 +10,8 @@ include(GNUInstallDirs)
 
 set(NANNERS_NAME nanners)
 
+option(NANNERS_DEBUG "Enable Nanners debug logging" OFF)
+
 add_library(${NANNERS_NAME} src/nanners.c)
 add_library(BANANUMS::${NANNERS_NAME} ALIAS ${NANNERS_NAME})  # build-tree alias
 
@@ -19,11 +21,20 @@ target_include_directories(${NANNERS_NAME} PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+if (NANNERS_DEBUG)
+    target_compile_definitions(nanners PRIVATE NANNERS_DEBUG=ON)
+endif()
+
 # Enable CTest & test subtree
-if(BUILD_TESTING)
+if(BUILD_TESTS)
     include(CTest)            # defines BUILD_TESTING option
     add_subdirectory(tests)
 endif()
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
 
 # Install headers and library
 install(TARGETS nanners

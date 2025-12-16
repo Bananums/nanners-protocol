@@ -1,9 +1,10 @@
 //Created by Bananums: https://github.com/Bananums
 
-#ifndef NANNERS_PROTOCOL_SRC_FRAME_H
-#define NANNERS_PROTOCOL_SRC_FRAME_H
+#ifndef NANNERS_PROTOCOL_INCLUDE_NANNERS_FRAME_H
+#define NANNERS_PROTOCOL_INCLUDE_NANNERS_FRAME_H
 
 #include "enums.h"
+#include "stdint.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +26,4 @@ typedef struct __attribute__((packed)) {
 }  /* extern "C" */
 #endif
 
-#endif //NANNERS_PROTOCOL_SRC_FRAME_H
+#endif //NANNERS_PROTOCOL_INCLUDE_NANNERS_FRAME_H

@@ -4,7 +4,7 @@ stateDiagram-v2
     READ_FRAME_ID --> READ_LENGTH : After 2 bytes
     READ_LENGTH --> READ_PAYLOAD : When length valid
     READ_LENGTH --> WAIT_FOR_SOF : When length invalid
-    READ_PAYLOAD --> READ_CRC : After 16 bytes
+    READ_PAYLOAD --> READ_CRC : After 8 bytes
     READ_CRC --> VERIFY_EOF : After 2 bytes
     VERIFY_EOF --> VALID_FRAME : On EOF (0x55) & CRC OK
     VERIFY_EOF --> WAIT_FOR_SOF : On CRC fail or invalid EOF

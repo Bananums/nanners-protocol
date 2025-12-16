@@ -1,7 +1,7 @@
 //Created by Bananums: https://github.com/Bananums
 
-#ifndef NANNERS_PROTOCOL_SRC_ENUMS_H
-#define NANNERS_PROTOCOL_SRC_ENUMS_H
+#ifndef NANNERS_PROTOCOL_INCLUDE_NANNERS_ENUMS_H
+#define NANNERS_PROTOCOL_INCLUDE_NANNERS_ENUMS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ typedef enum {
 }  /* extern "C" */
 #endif
 
-#endif // NANNERS_PROTOCOL_SRC_ENUMS_H
+#endif //NANNERS_PROTOCOL_INCLUDE_NANNERS_ENUMS_H
