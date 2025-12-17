@@ -203,3 +203,51 @@ NannersResult NannersProcessByte(NannersFrame* frame, const uint8_t byte, Nanner
     }
     return result;
 }
+
+int32_t NannersSerializeFrame(const uint16_t frame_id, const uint8_t seq,
+                              const uint8_t* payload, const uint8_t length,
+                              uint8_t* out_wire, size_t out_wire_len) {
+    if (out_wire == NULL) {
+        return -1;
+    }
+
+    if (length > NANNERS_MAX_PAYLOAD_SIZE) {
+        return -1;
+    }
+
+    if (sizeof(*payload) > NANNERS_MAX_PAYLOAD_SIZE) {
+        return -1;
+    }
+
+    const size_t wire_len =
+        1                       // SOF      (uint8)
+      + 2                       // Frame ID (uint16)
+      + 1                       // Sequence (uint8)
+      + 1                       // length   (uint8)
+      + (size_t)length          // payload  [1-8]
+      + 2                       // CRC      (uint16)
+      + 1;                      // EOF      (uint8)
+
+    if (out_wire_len < wire_len) {
+        return -1;
+    }
+
+    size_t n = 0;
+    out_wire[n++] = (uint8_t)NANNERS_START_OF_FRAME;
+    out_wire[n++] = (uint8_t)(frame_id >> 8);
+    out_wire[n++] = (uint8_t)(frame_id & 0xFF);
+    out_wire[n++] = (uint8_t)(seq);
+    out_wire[n++] = (uint8_t)(length);
+
+    if (length > 0) {
+        memcpy(&out_wire[n], payload, length); //Copy payload from n to n+frame.length
+        n += length;
+    }
+
+    const uint16_t crc = ComputeFrameCrc(frame);
+    out_wire[n++] = (uint8_t)(crc >> 8);
+    out_wire[n++] = (uint8_t)(crc & 0xFF);
+    out_wire[n++] = (uint8_t)(NANNERS_END_OF_FRAME);
+
+    return (int32_t)(n);
+}

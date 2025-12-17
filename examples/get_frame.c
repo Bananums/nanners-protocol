@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "nanners/frame.h"
 #include "nanners/nanners.h"
 
 static volatile sig_atomic_t global_run = 1;
@@ -79,21 +78,20 @@ int main(){
     while(global_run) {
         const int32_t len = ReadBytesSim(read_buffer, buffer_length);
         printf("Received %i bytes\n", len);
-        if (len <= 0) {
-            usleep(1000000);
-            continue;
-        }
 
-        for (int i = 0; i < len; i++) {
-            const uint8_t byte = read_buffer[i];
-            const NannersResult result = NannersProcessByte(&frame, byte, NULL);
-            if (result == NANNERS_FRAME_READY) {
-                printf("Frame Ready for processing\n");
-                //Process message
-                NannersReset(&frame);
-                break;
+        if (len > 0) {
+            for (int i = 0; i < len; i++) {
+                const uint8_t byte = read_buffer[i];
+                const NannersResult result = NannersProcessByte(&frame, byte, NULL);
+                if (result == NANNERS_FRAME_READY) {
+                    printf("Frame Ready for processing\n");
+                    //Process frame
+                    NannersReset(&frame);
+                    break;
+                }
             }
         }
+
         usleep(1000000);
     }
 
