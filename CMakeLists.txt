@@ -16,9 +16,10 @@ add_library(${NANNERS_NAME} src/nanners.c)
 add_library(BANANUMS::${NANNERS_NAME} ALIAS ${NANNERS_NAME})  # build-tree alias
 
 target_compile_features(nanners PUBLIC c_std_11)
-target_include_directories(${NANNERS_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+target_include_directories(${NANNERS_NAME}
+        PUBLIC
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 if (NANNERS_DEBUG)

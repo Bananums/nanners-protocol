@@ -17,14 +17,22 @@ enum {
 };
 
 typedef enum {
-    NANNERS_WAIT_FOR_SOF  = 0,
+    NANNERS_WAIT_FOR_SOF = 0,
     NANNERS_READ_FRAME_ID = 1,
     NANNERS_READ_SEQUENCE = 2,
-    NANNERS_READ_LENGTH   = 3,
-    NANNERS_READ_PAYLOAD  = 4,
-    NANNERS_READ_CRC      = 5,
-    NANNERS_VERIFY_EOF    = 6
+    NANNERS_READ_LENGTH = 3,
+    NANNERS_READ_PAYLOAD = 4,
+    NANNERS_READ_CRC = 5,
+    NANNERS_VERIFY_EOF = 6
 } NannersState;
+
+typedef enum {
+    NANNERS_WAIT = 0,
+    NANNERS_IN_PROGRESS = 1,
+    NANNERS_FRAME_READY = 2,
+    NANNERS_CRC_FAIL = 3,
+    NANNERS_PROTOCOL_ERROR = 4
+} NannersResult;
 
 #ifdef __cplusplus
 }  /* extern "C" */

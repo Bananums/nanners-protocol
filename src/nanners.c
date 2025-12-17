@@ -89,20 +89,21 @@ void NannersReset(NannersFrame* frame) {
     frame->length = 0;
     frame->crc = 0;
     frame->index = 0;
-    frame->valid = false;
     //frame->payload left as is, will be overwritten by new bytes
 }
 
 // Process each byte from UART
-void NannersProcessByte(NannersFrame* frame, uint8_t byte) {
+NannersResult NannersProcessByte(NannersFrame* frame, const uint8_t byte, NannersStats *stats) {
+    NannersResult result = NANNERS_IN_PROGRESS;
 
     switch (frame->state) {
         case NANNERS_WAIT_FOR_SOF:
             if (byte == (uint8_t)NANNERS_START_OF_FRAME) { // Start of Frame
               NANNERS_LOG("Received start of frame byte: %02X\n", byte);
-              frame->valid = false;
               frame->state = NANNERS_READ_FRAME_ID;
               frame->index = 0;
+            } else {
+              result = NANNERS_WAIT;
             }
         break;
 
@@ -132,8 +133,15 @@ void NannersProcessByte(NannersFrame* frame, uint8_t byte) {
             frame->length = byte;
             NANNERS_LOG("Received frame length %d\n", frame->length);
         if (frame->length > NANNERS_MAX_PAYLOAD_SIZE) {
+            result = NANNERS_PROTOCOL_ERROR;
+            if (stats != NULL) {
+                ++stats->format_fail;
+                ++stats->resync_count;
+            }
             frame->state = NANNERS_WAIT_FOR_SOF; // Invalid length, reset
+
         } else {
+            frame->state = (frame->length == 0) ? NANNERS_READ_CRC : NANNERS_READ_PAYLOAD; // Ternary expression to avoid branching
             frame->state = NANNERS_READ_PAYLOAD;
             frame->index = 0;
         }
@@ -157,7 +165,7 @@ void NannersProcessByte(NannersFrame* frame, uint8_t byte) {
                 NANNERS_LOG("Received crc part LO: %02X\n", byte);
                 NANNERS_LOG("Received CRC 0x%04X - %u\n", frame->crc, frame->crc);
                 frame->state = NANNERS_VERIFY_EOF;
-                frame->index = 0; //TODO Check if necessray to reset here
+                frame->index = 0;
             }
         break;
 
@@ -166,10 +174,25 @@ void NannersProcessByte(NannersFrame* frame, uint8_t byte) {
                 NANNERS_LOG("Received end of frame byte %02X\n", byte);
                 if (NannersCheckCrc(frame)) {
                     NANNERS_LOG("CRC okay\n");
-                    frame->valid = true;
+                    if (stats != NULL) {
+                        ++stats->frames_ok;
+                    }
+                    result = NANNERS_FRAME_READY;
                 } else {
                     NANNERS_LOG("CRC failed\n");
+                    if (stats != NULL) {
+                        ++stats->crc_fail;
+                        ++stats->resync_count;
+                    }
+                    result = NANNERS_CRC_FAIL;
                 }
+            } else {
+                if (stats != NULL) {
+                    ++stats->format_fail;
+                    ++stats->resync_count;
+
+                }
+                result = NANNERS_PROTOCOL_ERROR;
             }
         frame->state = NANNERS_WAIT_FOR_SOF;
         break;
@@ -178,4 +201,5 @@ void NannersProcessByte(NannersFrame* frame, uint8_t byte) {
             frame->state = NANNERS_WAIT_FOR_SOF;
         break;
     }
+    return result;
 }

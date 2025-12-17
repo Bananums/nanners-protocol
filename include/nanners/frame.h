@@ -19,7 +19,6 @@ typedef struct __attribute__((packed)) {
     uint8_t payload[NANNERS_MAX_PAYLOAD_SIZE];
     uint16_t crc;
     uint8_t index;
-    bool valid;
 } NannersFrame;
 
 #ifdef __cplusplus

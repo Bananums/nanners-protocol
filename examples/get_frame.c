@@ -78,11 +78,16 @@ int main(){
 
     while(global_run) {
         const int32_t len = ReadBytesSim(read_buffer, buffer_length);
-        printf("Received %d bytes\n", len);
+        printf("Received %i bytes\n", len);
+        if (len <= 0) {
+            usleep(1000000);
+            continue;
+        }
+
         for (int i = 0; i < len; i++) {
             const uint8_t byte = read_buffer[i];
-            NannersProcessByte(&frame, byte);
-            if (frame.valid) {
+            const NannersResult result = NannersProcessByte(&frame, byte, NULL);
+            if (result == NANNERS_FRAME_READY) {
                 printf("Frame Ready for processing\n");
                 //Process message
                 NannersReset(&frame);

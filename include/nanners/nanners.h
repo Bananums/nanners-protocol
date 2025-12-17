@@ -6,7 +6,8 @@
 #define NANNERS_PROTOCOL_INCLUDE_NANNERS_NANNERS_H
 
 #include <stdint.h>
-#include "frame.h"
+#include "nanners/frame.h"
+#include "nanners/structs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +15,7 @@ extern "C" {
 
 void NannersInit(NannersFrame* frame);
 void NannersReset(NannersFrame* frame);
-void NannersProcessByte(NannersFrame* frame, uint8_t byte);
+NannersResult NannersProcessByte(NannersFrame* frame, uint8_t byte, NannersStats *stats);
 uint16_t ComputeFrameCrc (const NannersFrame* frame);
 
 #ifdef __cplusplus
