@@ -7,56 +7,68 @@
 #include "nanners/putters.h"
 #include "nanners/enums.h"
 
-static bool ValidInput(const uint8_t* payload, const uint8_t* len, uint8_t bytes){
-  if(payload == NULL || len == NULL){
-    return false;
+static NannersPutResult ValidInput(const uint8_t* payload, const uint8_t* len, uint8_t bytes){
+  if(payload == NULL){
+    return NANNERS_PUT_ERR_PAYLOAD_NULL ;
+  }
+
+  if(len == NULL){
+    return NANNERS_PUT_ERR_LENGTH_NULL;
   }
 
   if(*len > NANNERS_MAX_PAYLOAD_SIZE){
-    return false;
+    return NANNERS_PUT_ERR_OUT_OF_BOUNDS;
   }
 
-  return bytes <= (uint8_t)(NANNERS_MAX_PAYLOAD_SIZE - *len);
+  if (bytes > (uint8_t)(NANNERS_MAX_PAYLOAD_SIZE - *len)) {
+    return NANNERS_PUT_ERR_OUT_OF_BOUNDS;
+  }
+
+  return NANNERS_PUT_OK;
 }
 
-bool NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value){
+NannersPutResult NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value){
   const uint8_t bytes = 1u;
-  if(!ValidInput(payload, len, bytes)){
-    return false;
+  NannersPutResult result = ValidInput(payload, len, bytes);
+  if(result != NANNERS_PUT_OK){
+    return result;
   }
 
   payload[(*len)++] = value ? 1u : 0u;
 
-  return true;
+  return NANNERS_PUT_OK;
 }
 
-bool NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value){
+NannersPutResult NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value){
   const uint8_t bytes = 1u;
- if(!ValidInput(payload, len, bytes)){
-   return false;
- }
+  NannersPutResult result = ValidInput(payload, len, bytes);
+  if(result != NANNERS_PUT_OK){
+    return result;
+  }
 
  payload[(*len)++] = value;
 
- return true;
-};
+ return NANNERS_PUT_OK;
+}
 
-bool NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value){
+NannersPutResult NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value){
   const uint8_t bytes = 2u;
-  if(!ValidInput(payload, len, bytes)){
-    return false;
+  NannersPutResult result = ValidInput(payload, len, bytes);
+  if(result != NANNERS_PUT_OK){
+    return result;
   }
 
   payload[(*len)++] = (uint8_t)((value >> 8) & 0xFFu);
   payload[(*len)++] = (uint8_t)(value & 0xFFu);
 
-  return true;
+  return NANNERS_PUT_OK;
 }
 
-bool NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value){
+NannersPutResult NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value){
   const uint8_t bytes = 4u;
-  if(!ValidInput(payload, len, bytes)){
-    return false;
+  NannersPutResult result = ValidInput(payload, len, bytes);
+  if(result != NANNERS_PUT_OK){
+    return result;
   }
 
   payload[(*len)++] = (uint8_t)((value >> 24) & 0xFFu);
@@ -64,26 +76,24 @@ bool NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value){
   payload[(*len)++] = (uint8_t)((value >> 8) & 0xFFu);
   payload[(*len)++] = (uint8_t)(value & 0xFFu);
 
-  return true;
+  return NANNERS_PUT_OK;
 }
 
-bool NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value){
+NannersPutResult NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value){
   return NannersPutU8(payload, len, (uint8_t)value);
 }
 
-bool NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value){
+NannersPutResult NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value){
   return NannersPutU16BE(payload, len, (uint16_t)value);
 }
 
-bool NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value){
+NannersPutResult NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value){
   return NannersPutU32BE(payload, len, (uint32_t)value);
 }
 
-bool NannersPutF32BE(uint8_t* payload, uint8_t* len, float value){
-  if(sizeof(float) != 4u){return false;} //Reqires 32-bit float. Should not be an issue on "todays" devices.
-  const uint8_t bytes = 4u;
-  if(!ValidInput(payload, len, bytes)){
-    return false;
+NannersPutResult NannersPutF32BE(uint8_t* payload, uint8_t* len, float value){
+  if(sizeof(float) != 4u){ //Reqires 32-bit float. Should not be an issue on "todays" devices.
+    return NANNERS_PUT_ERR_UNSUPPORTED_TYPE;
   }
 
   uint32_t temp = 0u;

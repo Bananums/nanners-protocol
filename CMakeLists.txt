@@ -12,7 +12,7 @@ set(NANNERS_NAME nanners)
 
 option(NANNERS_DEBUG "Enable Nanners debug logging" OFF)
 
-add_library(${NANNERS_NAME} src/nanners.c src/putters.c)
+add_library(${NANNERS_NAME} src/nanners.c src/putters.c src/logs.c)
 add_library(BANANUMS::${NANNERS_NAME} ALIAS ${NANNERS_NAME})  # build-tree alias
 
 target_compile_features(nanners PUBLIC c_std_11)
@@ -20,6 +20,8 @@ target_include_directories(${NANNERS_NAME}
         PUBLIC
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        PRIVATE
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
 if (NANNERS_DEBUG)

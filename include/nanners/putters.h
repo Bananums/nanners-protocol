@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include "nanners/frame.h"
+
 /**
  * @file putters.h
  * @brief Helpers for serializing values into a Nanners payload buffer.
@@ -34,7 +36,7 @@
  * @return true if the value was written; false if inputs are invalid or there
  *         is insufficient space.
  */
-bool NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value);
+NannersPutResult NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value);
 
 /**
  * @brief Append an unsigned 8-bit value to the payload.
@@ -44,7 +46,7 @@ bool NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-bool NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value);
+NannersPutResult NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value);
 
 /**
  * @brief Append an unsigned 16-bit value to the payload in big-endian order.
@@ -54,7 +56,7 @@ bool NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-bool NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value);
+NannersPutResult NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value);
 
 /**
  * @brief Append an unsigned 32-bit value to the payload in big-endian order.
@@ -64,7 +66,7 @@ bool NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-bool NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value);
+NannersPutResult NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value);
 
 /**
  * @brief Append a signed 8-bit value to the payload.
@@ -76,7 +78,7 @@ bool NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-bool NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value);
+NannersPutResult NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value);
 
 /**
  * @brief Append a signed 16-bit value to the payload in big-endian order.
@@ -88,7 +90,7 @@ bool NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-bool NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value);
+NannersPutResult NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value);
 
 /**
  * @brief Append a signed 32-bit value to the payload in big-endian order.
@@ -100,7 +102,7 @@ bool NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-bool NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
+NannersPutResult NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
 
 /**
  * @brief Append a 32-bit float to the payload in big-endian order.
@@ -114,6 +116,6 @@ bool NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
  * @return true on success; false on invalid inputs, insufficient space, or if
  *         `sizeof(float) != 4`.
  */
-bool NannersPutF32BE(uint8_t* payload, uint8_t* len, float value);
+NannersPutResult NannersPutF32BE(uint8_t* payload, uint8_t* len, float value);
 
 #endif //NANNERS_PROTOCOL_INCLUDE_NANNERS_PUTTERS_H

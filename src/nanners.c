@@ -3,7 +3,7 @@
 //
 
 #include "nanners/nanners.h"
-#include "nanners/nanners_log.h"
+#include "nanners_log.h"
 #include <string.h>
 #include <assert.h>
 

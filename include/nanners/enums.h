@@ -34,6 +34,14 @@ typedef enum {
     NANNERS_PROTOCOL_ERROR = 4
 } NannersResult;
 
+typedef enum {
+    NANNERS_PUT_OK = 0,
+    NANNERS_PUT_ERR_PAYLOAD_NULL,
+    NANNERS_PUT_ERR_LENGTH_NULL,
+    NANNERS_PUT_ERR_OUT_OF_BOUNDS,
+    NANNERS_PUT_ERR_UNSUPPORTED_TYPE
+} NannersPutResult;
+
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
