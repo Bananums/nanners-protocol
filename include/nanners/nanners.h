@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include "nanners/frame.h"
 #include "nanners/structs.h"
+#include "nanners/putters.h"
 
 #ifdef __cplusplus
 extern "C" {
