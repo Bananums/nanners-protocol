@@ -46,12 +46,14 @@ int main(void) {
     wire[n++] = (uint8_t)NANNERS_END_OF_FRAME;
 
     // Feed byte-by-byte
+
+    NannersResult result;
     for (size_t i = 0; i < n; ++i) {
-        NannersProcessByte(&frame, wire[i]);
+        result = NannersProcessByte(&frame, wire[i], NULL);
     }
 
     // Check result
-    assert(frame.valid == true);
+    assert(result == NANNERS_FRAME_READY);
 
     // Print result
     printf("Expected frame_id: %u, got: %u\n", frame_id, frame.frame_id);

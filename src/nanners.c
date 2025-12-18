@@ -48,7 +48,7 @@ static uint16_t ComputeCrc16(uint16_t crc, const uint8_t *data, uint8_t len) { /
     return crc;
 }
 
-static bool NannersCheckCrc(const NannersFrame* frame) {
+static bool NannersCheckFrameCrc(const NannersFrame* frame) {
     assert(frame != NULL);
     assert(frame->length <= NANNERS_MAX_PAYLOAD_SIZE);
 
@@ -77,6 +77,29 @@ uint16_t ComputeFrameCrc(const NannersFrame* frame) {
 
     // Complete CRC calculate on remaining payload. Done in two stages to reduce buffer size.
     return ComputeCrc16(partial_computed_crc, frame->payload, frame->length);
+}
+
+/* ---- Frame CRC over: frame_id, seq, length, payload[0..length-1] -------- */
+/* MSB-first (network byte order) for frame_id */
+uint16_t ComputeCrc(const uint16_t frame_id, const uint8_t seq,
+                              const uint8_t* payload, const uint8_t length) {
+    assert(length <= NANNERS_MAX_PAYLOAD_SIZE);
+
+    //enum { kConst = sizeof(frame->frame_id) + sizeof(frame->seq) + sizeof(frame->length)};
+    enum { kHeaderSize = 4 };  // frame_id(2) + seq(1) + length(1)
+
+    uint8_t buffer[kHeaderSize];
+    buffer[0] = (uint8_t)(frame_id >> 8);
+    buffer[1] = (uint8_t)(frame_id & 0xFFu);
+    buffer[2] = seq;
+    buffer[3] = length;
+
+    /* CRC-16/CCITT-FALSE: poly=0x1021, init=0xFFFF, xorout=0x0000, refin=false, refout=false */
+    //Partially compute the crc over the header
+    const uint16_t partial_computed_crc = ComputeCrc16(0xFFFFu, buffer, sizeof(buffer));
+
+    // Complete CRC calculate on remaining payload. Done in two stages to reduce buffer size.
+    return ComputeCrc16(partial_computed_crc, payload, length);
 }
 
 void NannersInit(NannersFrame* frame){
@@ -172,7 +195,7 @@ NannersResult NannersProcessByte(NannersFrame* frame, const uint8_t byte, Nanner
         case NANNERS_VERIFY_EOF:
             if (byte == (uint8_t)NANNERS_END_OF_FRAME) { // End of Frame
                 NANNERS_LOG("Received end of frame byte %02X\n", byte);
-                if (NannersCheckCrc(frame)) {
+                if (NannersCheckFrameCrc(frame)) {
                     NANNERS_LOG("CRC okay\n");
                     if (stats != NULL) {
                         ++stats->frames_ok;
@@ -244,7 +267,7 @@ int32_t NannersSerializeFrame(const uint16_t frame_id, const uint8_t seq,
         n += length;
     }
 
-    const uint16_t crc = ComputeFrameCrc(frame);
+    const uint16_t crc = ComputeCrc(frame_id, seq, payload, length);
     out_wire[n++] = (uint8_t)(crc >> 8);
     out_wire[n++] = (uint8_t)(crc & 0xFF);
     out_wire[n++] = (uint8_t)(NANNERS_END_OF_FRAME);
