@@ -15,10 +15,23 @@ option(NANNERS_DEBUG "Enable Nanners debug logging" OFF)
 add_library(${NANNERS_NAME} src/nanners.c src/putters.c src/logs.c)
 add_library(BANANUMS::${NANNERS_NAME} ALIAS ${NANNERS_NAME})  # build-tree alias
 
+set_target_properties( ${NANNERS_NAME} PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+)
+
 target_compile_features(nanners PUBLIC c_std_11)
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/include/nanners/version.h
+        @ONLY
+)
+
 target_include_directories(${NANNERS_NAME}
         PUBLIC
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+          $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         PRIVATE
           $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -48,6 +61,13 @@ install(TARGETS nanners
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/include/nanners/version.h
+        DESTINATION
+        ${CMAKE_INSTALL_INCLUDEDIR}/nanners
+)
+
 
 # Package exports (BANANUMS::nanners for consumers)
 install(EXPORT nannersTargets

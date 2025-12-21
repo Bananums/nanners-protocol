@@ -15,3 +15,5 @@ target_link_libraries(nanners_test_crc_compute PRIVATE nanners)
 target_include_directories(nanners_test_crc_compute PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 add_test(NAME nanners_crc_compute COMMAND nanners_test_crc_compute)
+
+add_subdirectory(install/consumer)
