@@ -6,6 +6,7 @@
 #define NANNERS_PROTOCOL_INCLUDE_NANNERS_PUTTERS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "nanners/frame.h"
 

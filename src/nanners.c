@@ -42,7 +42,7 @@ static const Crc16Table* GetCrc16Table() {
 static uint16_t ComputeCrc16(uint16_t crc, const uint8_t *data, uint8_t len) { //TODO(add into state machine)
     const Crc16Table* table = GetCrc16Table(); // Get from static storage to only compute once in program
     for (uint8_t i = 0; i < len; ++i) {
-        const uint8_t index = crc >> 8 & 0xFFu ^ data[i];
+        const uint8_t index = (crc >> 8 & 0xFFu) ^ data[i];
         crc = (uint16_t)(crc << 8 ^ table->data[index]);
     }
     return crc;
