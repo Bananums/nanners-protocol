@@ -116,8 +116,8 @@ void NannersReset(NannersFrame* frame) {
 }
 
 // Process each byte from UART
-NannersResult NannersProcessByte(NannersFrame* frame, const uint8_t byte, NannersStats *stats) {
-    NannersResult result = NANNERS_IN_PROGRESS;
+NannersFrameState NannersProcessByte(NannersFrame* frame, const uint8_t byte, NannersStats *stats) {
+    NannersFrameState result = NANNERS_IN_PROGRESS;
 
     switch (frame->state) {
         case NANNERS_WAIT_FOR_SOF:

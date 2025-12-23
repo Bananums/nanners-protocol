@@ -17,7 +17,7 @@ extern "C" {
 
 void NannersInit(NannersFrame* frame);
 void NannersReset(NannersFrame* frame);
-NannersResult NannersProcessByte(NannersFrame* frame, uint8_t byte, NannersStats *stats);
+NannersFrameState NannersProcessByte(NannersFrame* frame, uint8_t byte, NannersStats *stats);
 int32_t NannersSerializeFrame(uint16_t frame_id, uint8_t seq,
                               const uint8_t* payload, uint8_t length,
                               uint8_t* out_wire, size_t out_wire_len);

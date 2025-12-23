@@ -4,17 +4,17 @@
 
 #include "nanners/logs.h"
 
-const char* NannersPutResultToString(const NannersPutResult result) {
+const char* NannersPutResultToString(const NannersCodecResult result) {
     switch (result) {
-        case NANNERS_PUT_OK:
+        case NANNERS_CODEC_OK:
             return "OK";
-        case NANNERS_PUT_ERR_PAYLOAD_NULL:
+        case NANNERS_CODEC_ERR_PAYLOAD_NULL:
             return "Payload pointer is NULL";
-        case NANNERS_PUT_ERR_LENGTH_NULL:
+        case NANNERS_CODEC_ERR_LENGTH_NULL:
             return "Length pointer is NULL";
-        case NANNERS_PUT_ERR_OUT_OF_BOUNDS:
+        case NANNERS_CODEC_ERR_OUT_OF_BOUNDS:
             return "Payload out of bounds";
-        case NANNERS_PUT_ERR_UNSUPPORTED_TYPE:
+        case NANNERS_CODEC_ERR_UNSUPPORTED_TYPE:
             return "Unsupported type";
         default:
             return "Unknown NannersPutResult";

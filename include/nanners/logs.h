@@ -7,6 +7,6 @@
 
 #include "nanners/enums.h"
 
-const char* NannersPutResultToString(NannersPutResult result);
+const char* NannersPutResultToString(NannersCodecResult result);
 
 #endif //NANNERS_PROTOCOL_INCLUDE_NANNERS_LOGS_H

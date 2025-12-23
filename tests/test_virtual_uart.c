@@ -47,7 +47,7 @@ int main(void) {
 
     // Feed byte-by-byte
 
-    NannersResult result;
+    NannersFrameState result;
     for (size_t i = 0; i < n; ++i) {
         result = NannersProcessByte(&frame, wire[i], NULL);
     }

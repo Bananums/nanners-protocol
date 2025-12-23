@@ -41,7 +41,7 @@ extern "C" {
  * @return true if the value was written; false if inputs are invalid or there
  *         is insufficient space.
  */
-NannersPutResult NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value);
+NannersCodecResult NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value);
 
 /**
  * @brief Append an unsigned 8-bit value to the payload.
@@ -51,7 +51,7 @@ NannersPutResult NannersPutBoolean(uint8_t* payload, uint8_t* len, bool value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-NannersPutResult NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value);
+NannersCodecResult NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value);
 
 /**
  * @brief Append an unsigned 16-bit value to the payload in big-endian order.
@@ -61,7 +61,7 @@ NannersPutResult NannersPutU8(uint8_t* payload, uint8_t* len, uint8_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-NannersPutResult NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value);
+NannersCodecResult NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value);
 
 /**
  * @brief Append an unsigned 32-bit value to the payload in big-endian order.
@@ -71,7 +71,7 @@ NannersPutResult NannersPutU16BE(uint8_t* payload, uint8_t* len, uint16_t value)
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-NannersPutResult NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value);
+NannersCodecResult NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value);
 
 /**
  * @brief Append a signed 8-bit value to the payload.
@@ -83,7 +83,7 @@ NannersPutResult NannersPutU32BE(uint8_t* payload, uint8_t* len, uint32_t value)
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-NannersPutResult NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value);
+NannersCodecResult NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value);
 
 /**
  * @brief Append a signed 16-bit value to the payload in big-endian order.
@@ -95,7 +95,7 @@ NannersPutResult NannersPutS8(uint8_t* payload, uint8_t* len, int8_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-NannersPutResult NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value);
+NannersCodecResult NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value);
 
 /**
  * @brief Append a signed 32-bit value to the payload in big-endian order.
@@ -107,7 +107,7 @@ NannersPutResult NannersPutS16BE(uint8_t* payload, uint8_t* len, int16_t value);
  * @param value    Value to append.
  * @return true on success; false on invalid inputs or insufficient space.
  */
-NannersPutResult NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
+NannersCodecResult NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
 
 /**
  * @brief Append a 32-bit float to the payload in big-endian order.
@@ -121,7 +121,7 @@ NannersPutResult NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
  * @return true on success; false on invalid inputs, insufficient space, or if
  *         `sizeof(float) != 4`.
  */
-NannersPutResult NannersPutF32BE(uint8_t* payload, uint8_t* len, float value);
+NannersCodecResult NannersPutF32BE(uint8_t* payload, uint8_t* len, float value);
 
 #ifdef __cplusplus
 }  /* extern "C" */
