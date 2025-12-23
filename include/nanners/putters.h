@@ -10,6 +10,10 @@
 
 #include "nanners/frame.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @file putters.h
  * @brief Helpers for serializing values into a Nanners payload buffer.
@@ -118,5 +122,9 @@ NannersPutResult NannersPutS32BE(uint8_t* payload, uint8_t* len, int32_t value);
  *         `sizeof(float) != 4`.
  */
 NannersPutResult NannersPutF32BE(uint8_t* payload, uint8_t* len, float value);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif //NANNERS_PROTOCOL_INCLUDE_NANNERS_PUTTERS_H
